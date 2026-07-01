@@ -1,9 +1,13 @@
 /**
  * Demo seed — implement fully in GitHub Issue #30.
- * See docs/product/NombaFlow_Demo_Script.md Section 2.
  */
+import 'dotenv/config';
+import { createPrismaClient } from '../src/client';
+
 async function main() {
+  const prisma = createPrismaClient();
   console.log('Seed not implemented yet. See Issue #30.');
+  await prisma.$disconnect();
 }
 
 main().catch((e) => {

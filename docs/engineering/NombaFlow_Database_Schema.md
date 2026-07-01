@@ -15,7 +15,8 @@
 
 ```prisma
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -23,13 +24,30 @@ datasource db {
 }
 ```
 
-`prisma.config.ts` (connection URL — not in the schema file in Prisma 7):
+`prisma.config.ts` (connection URL — required in Prisma 7, not in schema):
 
 ```typescript
-datasource: {
-  url: env('DATABASE_URL'),
-}
+import 'dotenv/config';
+import { defineConfig, env } from 'prisma/config';
+
+export default defineConfig({
+  schema: 'prisma/schema.prisma',
+  datasource: { url: env('DATABASE_URL') },
+});
 ```
+
+Runtime client (driver adapter required in Prisma 7):
+
+```typescript
+import { PrismaClient } from '../generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
+
+const adapter = new PrismaPg(new Pool({ connectionString: process.env.DATABASE_URL }));
+const prisma = new PrismaClient({ adapter });
+```
+
+See [Prisma 7 upgrade guide](https://www.prisma.io/docs/guides/upgrade-prisma-orm/v7).
 
 ---
 

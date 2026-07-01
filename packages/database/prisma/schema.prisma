@@ -1,0 +1,317 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MerchantStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum PlanStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum PlanType {
+  STANDARD
+  AJO
+}
+
+enum BillingInterval {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  ANNUALLY
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  PAST_DUE
+  DUNNING
+  SUSPENDED
+  CANCELLED
+  PAUSED
+}
+
+enum ChargeStatus {
+  INITIATED
+  SUCCESS
+  FAILED
+  REVERSED
+  REFUNDED
+}
+
+enum DunningOutcome {
+  SUCCESS
+  FAILED
+  CANCELLED
+}
+
+enum AjoStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum AjoMemberStatus {
+  PENDING_ENROLLMENT
+  ACTIVE
+  DEFAULTED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETE
+  FAILED
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  FAILED
+}
+
+model Merchant {
+  id                  String         @id @default(cuid())
+  businessName        String
+  email               String         @unique
+  passwordHash        String
+  nombaClientId       String?        @db.Text
+  nombaClientSecret   String?        @db.Text
+  nombaAccountId      String?
+  nombaAccessToken    String?        @db.Text
+  nombaRefreshToken   String?        @db.Text
+  nombaTokenExpiresAt DateTime?
+  status              MerchantStatus @default(ACTIVE)
+  nombaConnected      Boolean        @default(false)
+  nombaConnectedAt    DateTime?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  plans         Plan[]
+  customers     Customer[]
+  ajoGroups     AjoGroup[]
+  webhookEvents WebhookEvent[]
+  notifications Notification[]
+
+  @@index([email])
+}
+
+model Plan {
+  id            String          @id @default(cuid())
+  merchantId    String
+  name          String
+  description   String?
+  amount        Decimal         @db.Decimal(12, 2)
+  currency      String          @default("NGN")
+  interval      BillingInterval
+  intervalCount Int             @default(1)
+  trialDays     Int             @default(0)
+  maxCycles     Int?
+  planType      PlanType        @default(STANDARD)
+  status        PlanStatus      @default(ACTIVE)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  merchant      Merchant       @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  subscriptions Subscription[]
+
+  @@index([merchantId, status])
+}
+
+model Customer {
+  id                    String   @id @default(cuid())
+  merchantId            String
+  name                  String
+  email                 String
+  phone                 String?
+  nombaTokenKey         String?  @db.Text
+  nombaTokenCardType    String?
+  nombaTokenCardPan     String?
+  nombaVirtualAccountId String?
+  virtualAccountNumber  String?
+  orderReference        String?  @unique
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  merchant       Merchant       @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  subscriptions  Subscription[]
+  ajoMemberships AjoMember[]
+  notifications  Notification[]
+
+  @@unique([merchantId, email])
+  @@index([merchantId])
+}
+
+model Subscription {
+  id                String             @id @default(cuid())
+  merchantId        String
+  customerId        String
+  planId            String
+  status            SubscriptionStatus @default(PENDING)
+  currentCycleStart DateTime?
+  nextBillingDate   DateTime?
+  cyclesCompleted   Int                @default(0)
+  totalPaid         Decimal            @default(0) @db.Decimal(12, 2)
+  cancelledAt       DateTime?
+  pausedAt          DateTime?
+  metadata          Json?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  customer        Customer         @relation(fields: [customerId], references: [id])
+  plan            Plan             @relation(fields: [planId], references: [id])
+  charges         Charge[]
+  dunningAttempts DunningAttempt[]
+
+  @@index([merchantId, status])
+  @@index([nextBillingDate, status])
+  @@index([customerId])
+}
+
+model Charge {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  merchantId     String
+  nombaReference String       @unique
+  amount         Decimal      @db.Decimal(12, 2)
+  currency       String       @default("NGN")
+  status         ChargeStatus @default(INITIATED)
+  failureCode    String?
+  failureMessage String?
+  nombaResponse  Json?
+  attemptNumber  Int          @default(1)
+  chargedAt      DateTime     @default(now())
+  settledAt      DateTime?
+  createdAt      DateTime     @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([subscriptionId])
+  @@index([merchantId, status])
+  @@index([nombaReference])
+}
+
+model DunningAttempt {
+  id             String          @id @default(cuid())
+  subscriptionId String
+  chargeId       String?
+  attemptNumber  Int
+  scheduledAt    DateTime
+  executedAt     DateTime?
+  aiScore        Float?
+  aiFeatures     Json?
+  aiReasoning    String?         @db.Text
+  outcome        DunningOutcome?
+  createdAt      DateTime        @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@index([subscriptionId])
+  @@index([scheduledAt])
+}
+
+model AjoGroup {
+  id                   String          @id @default(cuid())
+  merchantId           String
+  name                 String
+  contributionAmount   Decimal         @db.Decimal(12, 2)
+  currency             String          @default("NGN")
+  frequency            BillingInterval
+  currentRound         Int             @default(0)
+  totalRounds          Int
+  status               AjoStatus       @default(ACTIVE)
+  nextContributionDate DateTime?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  merchant Merchant    @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  members  AjoMember[]
+  payouts  AjoPayout[]
+
+  @@index([merchantId, status])
+}
+
+model AjoMember {
+  id         String          @id @default(cuid())
+  ajoGroupId String
+  customerId String?
+  name       String
+  email      String
+  phone      String?
+  position   Int
+  status     AjoMemberStatus @default(PENDING_ENROLLMENT)
+  enrolledAt DateTime?
+  createdAt  DateTime        @default(now())
+
+  ajoGroup AjoGroup  @relation(fields: [ajoGroupId], references: [id], onDelete: Cascade)
+  customer Customer? @relation(fields: [customerId], references: [id])
+
+  @@unique([ajoGroupId, position])
+  @@unique([ajoGroupId, email])
+  @@index([ajoGroupId])
+}
+
+model AjoPayout {
+  id             String       @id @default(cuid())
+  ajoGroupId     String
+  roundNumber    Int
+  beneficiaryId  String
+  amount         Decimal      @db.Decimal(12, 2)
+  nombaReference String?      @unique
+  status         PayoutStatus @default(PENDING)
+  scheduledAt    DateTime
+  executedAt     DateTime?
+  nombaResponse  Json?
+  createdAt      DateTime     @default(now())
+
+  ajoGroup AjoGroup @relation(fields: [ajoGroupId], references: [id])
+
+  @@unique([ajoGroupId, roundNumber])
+  @@index([ajoGroupId])
+}
+
+model WebhookEvent {
+  id              String    @id @default(cuid())
+  merchantId      String?
+  nombaEventId    String    @unique
+  eventType       String
+  payload         Json
+  processed       Boolean   @default(false)
+  processingError String?   @db.Text
+  receivedAt      DateTime  @default(now())
+  processedAt     DateTime?
+
+  merchant Merchant? @relation(fields: [merchantId], references: [id])
+
+  @@index([processed, receivedAt])
+  @@index([nombaEventId])
+}
+
+model Notification {
+  id         String             @id @default(cuid())
+  merchantId String
+  customerId String?
+  type       String
+  subject    String
+  body       String             @db.Text
+  status     NotificationStatus @default(QUEUED)
+  sentAt     DateTime?
+  error      String?
+  createdAt  DateTime           @default(now())
+
+  merchant Merchant  @relation(fields: [merchantId], references: [id])
+  customer Customer? @relation(fields: [customerId], references: [id])
+
+  @@index([merchantId, status])
+  @@index([customerId])
+}

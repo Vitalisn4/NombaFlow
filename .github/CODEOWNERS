@@ -1,0 +1,7 @@
+# Default reviewers by area (update @handles when teammates join)
+/docs/ @Vitalisn4
+/apps/api/ @Vitalisn4
+/packages/database/ @Vitalisn4
+/apps/web/ @Vitalisn4
+/apps/ai-service/ @Vitalisn4
+/packages/types/ @Vitalisn4

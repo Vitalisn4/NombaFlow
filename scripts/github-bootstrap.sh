@@ -6,7 +6,13 @@ set -euo pipefail
 REPO="${GITHUB_REPO:-Vitalisn4/NombaFlow}"
 
 create_label() {
-  gh label create "$1" --color "$2" --description "$3" --force --repo "$REPO"
+  local name="$1"
+  local color="$2"
+  local description="$3"
+  gh api --method POST "repos/$REPO/labels" \
+    -f name="$name" -f color="$color" -f description="$description" 2>/dev/null \
+    || gh api --method PATCH "repos/$REPO/labels/$(printf '%s' "$name" | sed 's/ /%20/g; s/:/%3A/g')" \
+    -f new_name="$name" -f color="$color" -f description="$description"
 }
 
 echo "Creating labels on $REPO..."
@@ -30,13 +36,10 @@ create_label "owner: ai" "ededed" "AI Specialist"
 
 echo "Creating milestones..."
 gh api "repos/$REPO/milestones" -f title="Day 1 — Foundation" \
-  -f description="Repo, infra, auth, database, first Nomba integration" \
-  -f state=open 2>/dev/null || true
+  -f description="Repo, infra, auth, database, first Nomba integration" -f state=open 2>/dev/null || true
 gh api "repos/$REPO/milestones" -f title="Day 2 — Core Engine" \
-  -f description="Billing engine, webhooks, dunning, ajo, dashboard" \
-  -f state=open 2>/dev/null || true
+  -f description="Billing engine, webhooks, dunning, ajo, dashboard" -f state=open 2>/dev/null || true
 gh api "repos/$REPO/milestones" -f title="Day 3 — Polish & Demo" \
-  -f description="UI polish, deployment, demo prep, submission" \
-  -f state=open 2>/dev/null || true
+  -f description="UI polish, deployment, demo prep, submission" -f state=open 2>/dev/null || true
 
 echo "Done. Labels and milestones ready."

@@ -2,6 +2,9 @@
 
 **Managed recurring billing engine on Nomba** — built for the [Nomba × DevCareer Hackathon 2026](https://devcareer.io).
 
+**Repository:** https://github.com/Vitalisn4/NombaFlow  
+**Active branch:** `develop` (feature work) · `main` (protected, merge via PR)
+
 NombaFlow gives Nigerian businesses a subscriptions layer on top of Nomba's payment primitives: plan management, tokenized card billing, AI-powered dunning, customer self-service, and ajo/esusu group automation.
 
 **Hackathon track:** Infrastructure — Subscriptions Engine

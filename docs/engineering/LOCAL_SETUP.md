@@ -29,13 +29,14 @@ Create these before writing feature code:
 ## Repository setup
 
 ```bash
-git clone https://github.com/your-org/nombaflow.git
-cd nombaflow
+git clone git@github.com:Vitalisn4/NombaFlow.git
+cd NombaFlow
+git checkout develop
 corepack enable
 pnpm install   # from repo root — installs all workspace packages
 ```
 
-Follow [GitHub Issue #1](./operations/NombaFlow_GitHub_Issues.md) for monorepo scaffolding (`pnpm-workspace.yaml`, root `package.json`).
+Follow [GitHub Issue #1](./operations/NombaFlow_GitHub_Issues.md) — **complete** on `main`. Continue with Issues #2–#4 for full app tooling.
 
 **Package manager rule:** use **pnpm only** — do not use npm or yarn in this repo. Commit `pnpm-lock.yaml`.
 

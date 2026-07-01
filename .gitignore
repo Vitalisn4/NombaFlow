@@ -24,7 +24,7 @@ __pycache__/
 .venv/
 venv/
 
-# Prisma generated
+# Prisma generated (legacy custom output — client now uses @prisma/client in node_modules)
 packages/database/generated/
 
 # Local-only docs (team lead keeps these on disk; not published to GitHub)

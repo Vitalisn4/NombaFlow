@@ -46,6 +46,7 @@ Issue #1 (monorepo init) is **complete** on `main`. Continue with Issues #2–#4
 cp apps/web/.env.example apps/web/.env.local
 cp apps/api/.env.example apps/api/.env
 cp apps/ai-service/.env.example apps/ai-service/.env
+cp packages/database/.env.example packages/database/.env
 ```
 
 Full reference: [Environment Variables](./NombaFlow_Env_Variables.md)

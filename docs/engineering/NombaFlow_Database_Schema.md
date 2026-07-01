@@ -3,22 +3,31 @@
 **Purpose:** The Backend Developer keeps this file open while writing migrations and queries.
 
 **Database:** PostgreSQL 17 via Neon
-**ORM:** Prisma 7
-**File location in repo:** `packages/database/prisma/schema.prisma`
+**ORM:** Prisma 7  
+**Schema:** `packages/database/prisma/schema.prisma`  
+**Config:** `packages/database/prisma.config.ts` (`DATABASE_URL`)
 
 ---
 
 ## 1. Prisma Configuration Block
 
+`schema.prisma`:
+
 ```prisma
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+}
+```
+
+`prisma.config.ts` (connection URL — not in the schema file in Prisma 7):
+
+```typescript
+datasource: {
+  url: env('DATABASE_URL'),
 }
 ```
 

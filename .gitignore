@@ -39,7 +39,9 @@ docs/product/NombaFlow_Email_Templates.md
 
 # IDE
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 *.swp
 
 # OS

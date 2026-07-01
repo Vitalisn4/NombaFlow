@@ -1,0 +1,7 @@
+{
+  "prisma.schema": "packages/database/prisma/schema.prisma",
+  "prisma.fileWatcher": true,
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  }
+}

@@ -36,7 +36,7 @@ corepack enable
 pnpm install   # from repo root — installs all workspace packages
 ```
 
-Follow [GitHub Issue #1](./operations/NombaFlow_GitHub_Issues.md) — **complete** on `main`. Continue with Issues #2–#4 for full app tooling.
+Issue #1 (monorepo init) is **complete** on `main`. Continue with Issues #2–#4 on GitHub for full app tooling.
 
 **Package manager rule:** use **pnpm only** — do not use npm or yarn in this repo. Commit `pnpm-lock.yaml`.
 

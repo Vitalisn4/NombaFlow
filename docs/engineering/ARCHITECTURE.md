@@ -238,4 +238,4 @@ Per [PRD §5.3](../product/NombaFlow_PRD_v2.md):
 | API shapes | [API Contract](./NombaFlow_API_Contract_v2.md) |
 | Coding rules | [Coding Standards](./CODING_STANDARDS.md) |
 | Git/PR process | [Development Workflow](./DEVELOPMENT_WORKFLOW.md) |
-| Tasks | [GitHub Issues](../operations/NombaFlow_GitHub_Issues.md) |
+| Tasks | [GitHub Issues](https://github.com/Vitalisn4/NombaFlow/issues) |

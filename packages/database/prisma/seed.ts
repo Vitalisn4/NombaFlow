@@ -1,6 +1,3 @@
-/**
- * Demo seed — implement fully in GitHub Issue #30.
- */
 import 'dotenv/config';
 import { createPrismaClient } from '../src/client';
 

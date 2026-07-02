@@ -1,22 +1,15 @@
 @import 'tailwindcss';
 
-/*
- * NombaFlow design tokens — UI Spec Section 1
- * https://github.com/Vitalisn4/NombaFlow/blob/develop/docs/product/NombaFlow_UI_Spec.md
- */
 :root {
-  /* Brand */
   --color-brand-gold: #f5a623;
   --color-brand-black: #0d0d0d;
   --color-brand-white: #ffffff;
 
-  /* Semantic */
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
   --color-info: #3b82f6;
 
-  /* Surfaces */
   --color-surface: #f9fafb;
   --color-surface-raised: #ffffff;
   --color-border: #e5e7eb;
@@ -24,12 +17,10 @@
   --color-text-secondary: #6b7280;
   --color-text-muted: #9ca3af;
 
-  /* Typography (font families set on <html> via next/font) */
   --font-heading: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 
-  /* Status badge — UI Spec Section 1 */
   --badge-active-bg: #dcfce7;
   --badge-active-text: #15803d;
   --badge-past-due-bg: #fef9c3;
@@ -43,7 +34,6 @@
   --badge-pending-bg: #eff6ff;
   --badge-pending-text: #1d4ed8;
 
-  /* shadcn/ui theme (mapped to NombaFlow palette) */
   --background: var(--color-surface);
   --foreground: var(--color-text-primary);
   --card: var(--color-surface-raised);

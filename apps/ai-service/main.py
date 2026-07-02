@@ -1,14 +1,16 @@
 import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 load_dotenv()
 
 from routers import dunning, churn, forecast, insights
 
-AI_SERVICE_SECRET = os.getenv("AI_SERVICE_SECRET", "dev-secret-change-me")
+# Fail fast if secret not set — never ship a default
+AI_SERVICE_SECRET = os.environ["AI_SERVICE_SECRET"]
+
+IS_PRODUCTION = os.getenv("ENVIRONMENT", "development") == "production"
 
 
 @asynccontextmanager
@@ -20,23 +22,20 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="NombaFlow AI Service",
-    description="Smart dunning, churn prediction, cash flow forecasting, and NL insights",
+    description="Internal AI service — smart dunning, churn, forecasting, insights",
     version="1.0.0",
     lifespan=lifespan,
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[os.getenv("FRONTEND_URL", "http://localhost:3000")],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    # Disable docs in production — internal service only
+    docs_url=None if IS_PRODUCTION else "/docs",
+    redoc_url=None if IS_PRODUCTION else "/redoc",
+    openapi_url=None if IS_PRODUCTION else "/openapi.json",
 )
 
 
 @app.middleware("http")
 async def verify_internal_secret(request: Request, call_next):
-    if request.url.path in ["/health", "/docs", "/openapi.json"]:
+    # Only /health is public — everything else requires internal secret
+    if request.url.path == "/health":
         return await call_next(request)
     secret = request.headers.get("X-Internal-Secret")
     if secret != AI_SERVICE_SECRET:
@@ -46,10 +45,11 @@ async def verify_internal_secret(request: Request, call_next):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "nombaflow-ai"}
+    return {"status": "ok"}
 
 
-app.include_router(dunning.router, prefix="/ai/dunning", tags=["Dunning"])
-app.include_router(churn.router, prefix="/ai/churn", tags=["Churn"])
-app.include_router(forecast.router, prefix="/ai/forecast", tags=["Forecast"])
-app.include_router(insights.router, prefix="/ai/insights", tags=["Insights"])
+# Routes aligned to API Contract v2 §12
+app.include_router(dunning.router, tags=["Dunning"])
+app.include_router(churn.router, tags=["Churn"])
+app.include_router(forecast.router, tags=["Forecast"])
+app.include_router(insights.router, tags=["Insights"])

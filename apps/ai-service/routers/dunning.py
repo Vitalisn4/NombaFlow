@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from datetime import datetime, timedelta
 from typing import Optional
 
-router = APIRouter()
+router = APIRouter(prefix="")
 
 
 class PaymentHistoryItem(BaseModel):
@@ -45,7 +45,7 @@ def parse_day_of_month(dt_str: str) -> Optional[int]:
         return None
 
 
-@router.post("/recommend-retry", response_model=DunningResponse)
+@router.post("/predict-retry", response_model=DunningResponse)
 def recommend_retry(req: DunningRequest) -> DunningResponse:
     successful = [p for p in req.paymentHistory if p.status == "SUCCESS"]
     now = datetime.utcnow()

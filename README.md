@@ -58,7 +58,7 @@ nombaflow/
 ├── pnpm-workspace.yaml
 ├── package.json
 ├── apps/
-│   ├── web/          # Next.js — Issue #2 for full Tailwind/shadcn setup
+│   ├── web/          # Next.js — GitHub #9 for full Tailwind/shadcn setup
 │   ├── api/          # NestJS — health check at GET /health
 │   └── ai-service/   # FastAPI — health check at GET /health
 ├── packages/

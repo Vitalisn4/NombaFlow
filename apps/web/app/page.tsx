@@ -3,7 +3,7 @@ export default function HomePage() {
     <main style={{ padding: '2rem', fontFamily: 'system-ui, sans-serif' }}>
       <h1>NombaFlow</h1>
       <p>Managed recurring billing on Nomba — frontend scaffold ready.</p>
-      <p>See GitHub Issue #2 for full Next.js setup.</p>
+      <p>See GitHub issue #9 for full Next.js setup.</p>
     </main>
   );
 }

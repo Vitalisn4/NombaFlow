@@ -1,0 +1,116 @@
+@import 'tailwindcss';
+
+/*
+ * NombaFlow design tokens — UI Spec Section 1
+ * https://github.com/Vitalisn4/NombaFlow/blob/develop/docs/product/NombaFlow_UI_Spec.md
+ */
+:root {
+  /* Brand */
+  --color-brand-gold: #f5a623;
+  --color-brand-black: #0d0d0d;
+  --color-brand-white: #ffffff;
+
+  /* Semantic */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Surfaces */
+  --color-surface: #f9fafb;
+  --color-surface-raised: #ffffff;
+  --color-border: #e5e7eb;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-muted: #9ca3af;
+
+  /* Typography (font families set on <html> via next/font) */
+  --font-heading: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* Status badge — UI Spec Section 1 */
+  --badge-active-bg: #dcfce7;
+  --badge-active-text: #15803d;
+  --badge-past-due-bg: #fef9c3;
+  --badge-past-due-text: #854d0e;
+  --badge-dunning-bg: #fef3c7;
+  --badge-dunning-text: #92400e;
+  --badge-suspended-bg: #fee2e2;
+  --badge-suspended-text: #991b1b;
+  --badge-cancelled-bg: #f3f4f6;
+  --badge-cancelled-text: #6b7280;
+  --badge-pending-bg: #eff6ff;
+  --badge-pending-text: #1d4ed8;
+
+  /* shadcn/ui theme (mapped to NombaFlow palette) */
+  --background: var(--color-surface);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-surface-raised);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-surface-raised);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--color-brand-black);
+  --primary-foreground: var(--color-brand-white);
+  --secondary: var(--color-surface);
+  --secondary-foreground: var(--color-text-primary);
+  --muted: var(--color-surface);
+  --muted-foreground: var(--color-text-muted);
+  --accent: #fff7ed;
+  --accent-foreground: var(--color-brand-black);
+  --destructive: var(--color-danger);
+  --destructive-foreground: var(--color-brand-white);
+  --border: var(--color-border);
+  --input: var(--color-border);
+  --ring: var(--color-brand-gold);
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+  }
+}

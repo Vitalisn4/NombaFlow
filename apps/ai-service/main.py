@@ -9,7 +9,6 @@ from routers import dunning, churn, forecast, insights
 
 # Fail fast if secret not set — never ship a default
 AI_SERVICE_SECRET = os.environ["AI_SERVICE_SECRET"]
-
 IS_PRODUCTION = os.getenv("ENVIRONMENT", "development") == "production"
 
 
@@ -37,9 +36,11 @@ async def verify_internal_secret(request: Request, call_next):
     # Only /health is public — everything else requires internal secret
     if request.url.path == "/health":
         return await call_next(request)
+
     secret = request.headers.get("X-Internal-Secret")
     if secret != AI_SERVICE_SECRET:
         raise HTTPException(status_code=401, detail="Unauthorized")
+
     return await call_next(request)
 
 

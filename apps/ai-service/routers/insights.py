@@ -94,7 +94,6 @@ Merchant financial data:
             ],
         )
         answer = message.content[0].text
-
     except Exception as e:
         raise HTTPException(
             status_code=503,

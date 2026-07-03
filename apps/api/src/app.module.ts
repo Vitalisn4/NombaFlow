@@ -1,9 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { ApiExceptionFilter } from './common/filters/api-exception.filter';
-import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
+import { resolveRequestId } from './common/utils/request-id';
 import { HealthModule } from './health/health.module';
 import { SmokeModule } from './smoke/smoke.module';
 
@@ -22,11 +22,12 @@ import { SmokeModule } from './smoke/smoke.module';
                 },
               }
             : undefined,
+        genReqId: (req, res) => resolveRequestId(req, res),
         autoLogging: {
           ignore: (req) => req.url === '/health',
         },
         customProps: (req) => ({
-          requestId: (req as { id?: string }).id,
+          requestId: req.id,
         }),
       },
     }),
@@ -34,7 +35,6 @@ import { SmokeModule } from './smoke/smoke.module';
     SmokeModule,
   ],
   providers: [
-    RequestIdMiddleware,
     {
       provide: APP_FILTER,
       useClass: ApiExceptionFilter,
@@ -45,8 +45,4 @@ import { SmokeModule } from './smoke/smoke.module';
     },
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(RequestIdMiddleware).forRoutes('{*path}');
-  }
-}
+export class AppModule {}

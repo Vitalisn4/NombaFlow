@@ -24,7 +24,10 @@ async function bootstrap() {
     exclude: ['health'],
   });
 
-  await app.listen(env.PORT);
+  await app.listen(env.PORT, '0.0.0.0');
 }
 
-bootstrap();
+bootstrap().catch((err: unknown) => {
+  console.error('Failed to start API:', err);
+  process.exit(1);
+});

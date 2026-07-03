@@ -123,6 +123,14 @@ export class ApiExceptionFilter implements ExceptionFilter {
         return ApiErrorCode.FORBIDDEN;
       case HttpStatus.NOT_FOUND:
         return ApiErrorCode.NOT_FOUND;
+      case HttpStatus.CONFLICT:
+        return ApiErrorCode.DUPLICATE_CUSTOMER;
+      case HttpStatus.UNPROCESSABLE_ENTITY:
+        return ApiErrorCode.INVALID_NOMBA_CREDENTIALS;
+      case HttpStatus.TOO_MANY_REQUESTS:
+        return ApiErrorCode.RATE_LIMITED;
+      case HttpStatus.BAD_GATEWAY:
+        return ApiErrorCode.NOMBA_API_ERROR;
       default:
         return ApiErrorCode.INTERNAL_ERROR;
     }

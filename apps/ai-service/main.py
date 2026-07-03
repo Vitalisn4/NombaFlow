@@ -49,7 +49,7 @@ def health():
     return {"status": "ok"}
 
 
-# Routes aligned to API Contract v2 §12
+# Routes aligned to API Contract v2 §12 — no /ai/... prefix
 app.include_router(dunning.router, tags=["Dunning"])
 app.include_router(churn.router, tags=["Churn"])
 app.include_router(forecast.router, tags=["Forecast"])

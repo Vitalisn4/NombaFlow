@@ -24,18 +24,11 @@ class ForecastRequest(BaseModel):
     expectedNewSubscriptionsPerMonth: int
 
 
-class ChartDataPoint(BaseModel):
-    date: str
-    expected: str
-    collected: Optional[str] = None
-
-
 class ForecastResponse(BaseModel):
     merchantId: str
     generatedAt: str
     forecast: dict
     atRiskAmount: str
-    chartData: list[ChartDataPoint]
 
 
 def project_collections(
@@ -99,22 +92,6 @@ def generate_forecast(merchant_id: str, req: ForecastRequest) -> ForecastRespons
 
     at_risk = round(exp30 - risk30, 2)
 
-    # Chart data — collected is null for future months (no fabricated data)
-    chart_data = []
-    for month_offset in range(4):
-        date = now + timedelta(days=30 * month_offset)
-        exp, _ = project_collections(
-            req.activeSubscriptions,
-            30 * (month_offset + 1),
-            req.historicalChurnRateMonthly,
-            req.expectedNewSubscriptionsPerMonth,
-        )
-        chart_data.append(ChartDataPoint(
-            date=date.strftime("%Y-%m-%d"),
-            expected=f"{exp:.2f}",
-            collected=None,  # only populated with real DB data by backend
-        ))
-
     return ForecastResponse(
         merchantId=merchant_id,
         generatedAt=now.isoformat() + "Z",
@@ -124,5 +101,4 @@ def generate_forecast(merchant_id: str, req: ForecastRequest) -> ForecastRespons
             "next90Days": f"{exp90:.2f}",
         },
         atRiskAmount=f"{at_risk:.2f}",
-        chartData=chart_data,
     )

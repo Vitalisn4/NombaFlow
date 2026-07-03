@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from datetime import datetime, timedelta
-from typing import Optional
 
 router = APIRouter()
 
@@ -20,18 +19,11 @@ class ForecastRequest(BaseModel):
     expectedNewSubscriptionsPerMonth: int
 
 
-class ChartDataPoint(BaseModel):
-    date: str
-    expected: str
-    collected: Optional[str] = None
-
-
 class ForecastResponse(BaseModel):
     merchantId: str
     generatedAt: str
     forecast: dict
     atRiskAmount: str
-    chartData: list[ChartDataPoint]
 
 
 def project_collections(subscriptions, days, churn_rate_monthly, new_subs_per_month):
@@ -42,7 +34,9 @@ def project_collections(subscriptions, days, churn_rate_monthly, new_subs_per_mo
 
     for sub in subscriptions:
         try:
-            next_billing = datetime.fromisoformat(sub.nextBillingDate.replace("Z", "+00:00")).replace(tzinfo=None)
+            next_billing = datetime.fromisoformat(
+                sub.nextBillingDate.replace("Z", "+00:00")
+            ).replace(tzinfo=None)
         except Exception:
             continue
 
@@ -50,10 +44,8 @@ def project_collections(subscriptions, days, churn_rate_monthly, new_subs_per_mo
         while current_date <= end_date:
             month_index = max(0, (current_date - now).days // 30)
             survival_rate = (1 - churn_rate_monthly) ** month_index
-            charge_expected = sub.amount * survival_rate
-            charge_risk_adjusted = charge_expected * sub.historicalSuccessRate
-            total_expected += charge_expected
-            total_risk_adjusted += charge_risk_adjusted
+            total_expected += sub.amount * survival_rate
+            total_risk_adjusted += sub.amount * survival_rate * sub.historicalSuccessRate
             current_date += timedelta(days=sub.intervalDays)
 
     if subscriptions:
@@ -74,16 +66,8 @@ def generate_forecast(merchant_id: str, req: ForecastRequest) -> ForecastRespons
     now = datetime.utcnow()
 
     exp30, risk30 = project_collections(req.activeSubscriptions, 30, req.historicalChurnRateMonthly, req.expectedNewSubscriptionsPerMonth)
-    exp60, risk60 = project_collections(req.activeSubscriptions, 60, req.historicalChurnRateMonthly, req.expectedNewSubscriptionsPerMonth)
-    exp90, risk90 = project_collections(req.activeSubscriptions, 90, req.historicalChurnRateMonthly, req.expectedNewSubscriptionsPerMonth)
-
-    at_risk = round(exp30 - risk30, 2)
-
-    chart_data = []
-    for month_offset in range(4):
-        date = now + timedelta(days=30 * month_offset)
-        exp, _ = project_collections(req.activeSubscriptions, 30 * (month_offset + 1), req.historicalChurnRateMonthly, req.expectedNewSubscriptionsPerMonth)
-        chart_data.append(ChartDataPoint(date=date.strftime("%Y-%m-%d"), expected=f"{exp:.2f}", collected=None))
+    exp60, _ = project_collections(req.activeSubscriptions, 60, req.historicalChurnRateMonthly, req.expectedNewSubscriptionsPerMonth)
+    exp90, _ = project_collections(req.activeSubscriptions, 90, req.historicalChurnRateMonthly, req.expectedNewSubscriptionsPerMonth)
 
     return ForecastResponse(
         merchantId=merchant_id,
@@ -93,6 +77,5 @@ def generate_forecast(merchant_id: str, req: ForecastRequest) -> ForecastRespons
             "next60Days": f"{exp60:.2f}",
             "next90Days": f"{exp90:.2f}",
         },
-        atRiskAmount=f"{at_risk:.2f}",
-        chartData=chart_data,
+        atRiskAmount=f"{round(exp30 - risk30, 2):.2f}",
     )

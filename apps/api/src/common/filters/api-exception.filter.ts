@@ -86,12 +86,16 @@ export class ApiExceptionFilter implements ExceptionFilter {
 
   private formatZodMessage(exception: ZodValidationException): string {
     const zodError = exception.getZodError();
-    const first = zodError.issues[0];
-    if (!first) {
+    if (zodError.issues.length === 0) {
       return 'Request body failed validation.';
     }
-    const path = first.path.length > 0 ? `${first.path.join('.')}: ` : '';
-    return `${path}${first.message}`;
+
+    return zodError.issues
+      .map((issue) => {
+        const path = issue.path.length > 0 ? `${issue.path.join('.')}: ` : '';
+        return `${path}${issue.message}`;
+      })
+      .join('; ');
   }
 
   private extractHttpMessage(
@@ -101,14 +105,9 @@ export class ApiExceptionFilter implements ExceptionFilter {
     if (typeof payload === 'string') {
       return payload;
     }
-    if (typeof payload === 'object' && payload !== null) {
-      if ('message' in payload) {
-        const message = (payload as { message: string | string[] }).message;
-        return Array.isArray(message) ? message.join(', ') : String(message);
-      }
-      if ('code' in payload && 'message' in payload) {
-        return String((payload as { message: string }).message);
-      }
+    if (typeof payload === 'object' && payload !== null && 'message' in payload) {
+      const message = (payload as { message: string | string[] }).message;
+      return Array.isArray(message) ? message.join(', ') : String(message);
     }
     return fallback;
   }
@@ -123,14 +122,8 @@ export class ApiExceptionFilter implements ExceptionFilter {
         return ApiErrorCode.FORBIDDEN;
       case HttpStatus.NOT_FOUND:
         return ApiErrorCode.NOT_FOUND;
-      case HttpStatus.CONFLICT:
-        return ApiErrorCode.DUPLICATE_CUSTOMER;
-      case HttpStatus.UNPROCESSABLE_ENTITY:
-        return ApiErrorCode.INVALID_NOMBA_CREDENTIALS;
       case HttpStatus.TOO_MANY_REQUESTS:
         return ApiErrorCode.RATE_LIMITED;
-      case HttpStatus.BAD_GATEWAY:
-        return ApiErrorCode.NOMBA_API_ERROR;
       default:
         return ApiErrorCode.INTERNAL_ERROR;
     }

@@ -7,6 +7,8 @@ import { resolveRequestId } from './common/utils/request-id';
 import { HealthModule } from './health/health.module';
 import { SmokeModule } from './smoke/smoke.module';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 @Module({
   imports: [
     LoggerModule.forRoot({
@@ -32,7 +34,7 @@ import { SmokeModule } from './smoke/smoke.module';
       },
     }),
     HealthModule,
-    SmokeModule,
+    ...(isProduction ? [] : [SmokeModule]),
   ],
   providers: [
     {

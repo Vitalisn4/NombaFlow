@@ -1,6 +1,7 @@
 import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
+from starlette.responses import JSONResponse
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -33,11 +34,9 @@ app = FastAPI(
 async def verify_internal_secret(request: Request, call_next):
     if request.url.path == "/health":
         return await call_next(request)
-
     secret = request.headers.get("X-Internal-Secret")
     if secret != AI_SERVICE_SECRET:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
     return await call_next(request)
 
 

@@ -50,7 +50,7 @@ def recommend_retry(req: DunningRequest) -> DunningResponse:
     successful = [p for p in req.paymentHistory if p.status == "SUCCESS"]
     now = datetime.utcnow()
 
-    if len(successful) < 2:
+    if len(successful) < 3:
         retry_at = now + timedelta(hours=72)
         return DunningResponse(
             recommendedRetryAt=retry_at.isoformat() + "Z",

@@ -29,7 +29,7 @@ class ChurnResponse(BaseModel):
     recommendedAction: str
 
 
-@router.post("/score", response_model=ChurnResponse)
+@router.post("/churn-score", response_model=ChurnResponse)
 def score_churn(req: ChurnRequest) -> ChurnResponse:
     score = 0.0
     risk_factors = []

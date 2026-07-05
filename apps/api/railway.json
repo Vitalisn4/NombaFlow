@@ -1,0 +1,11 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "buildCommand": "cd ../.. && pnpm install --frozen-lockfile && pnpm --filter @nombaflow/api build"
+  },
+  "deploy": {
+    "startCommand": "cd ../.. && pnpm --filter @nombaflow/api start:prod",
+    "healthcheckPath": "/health",
+    "healthcheckTimeout": 120
+  }
+}

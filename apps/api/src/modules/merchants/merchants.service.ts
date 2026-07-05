@@ -1,4 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { ApiErrorCode } from '../../common/errors/api-error-code';
+import { ApiException } from '../../common/errors/api.exception';
 import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
@@ -11,7 +13,11 @@ export class MerchantsService {
     });
 
     if (!merchant) {
-      throw new NotFoundException('Merchant not found');
+      throw new ApiException(
+        ApiErrorCode.NOT_FOUND,
+        'Merchant not found.',
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     return {

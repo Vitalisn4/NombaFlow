@@ -58,3 +58,4 @@ coverage/
 
 # Models (trained locally, commit .pkl only if small)
 apps/ai-service/models/*.pkl
+apps/web/next-env.d.ts

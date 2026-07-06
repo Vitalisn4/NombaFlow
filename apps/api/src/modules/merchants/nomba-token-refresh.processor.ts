@@ -1,6 +1,5 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { Job } from 'bullmq';
 import { decrypt, encrypt } from '../../common/utils/encryption';
 import { loadEnv } from '../../config/env';
 import { PrismaService } from '../../database/prisma.service';

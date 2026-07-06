@@ -8,6 +8,9 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32),
   JWT_ACCESS_TOKEN_EXPIRY: z.string().default('15m'),
   JWT_REFRESH_TOKEN_EXPIRY: z.string().default('7d'),
+  ENCRYPTION_KEY: z.string().length(64, 'ENCRYPTION_KEY must be a 64-character hex string (32 bytes)'),
+  NOMBA_BASE_URL: z.string().url().default('https://api.nomba.com/v1'),
+  REDIS_URL: z.string().min(1),
 });
 
 export type Env = {
@@ -18,6 +21,9 @@ export type Env = {
   JWT_SECRET: string;
   JWT_ACCESS_TOKEN_EXPIRY: string;
   JWT_REFRESH_TOKEN_EXPIRY: string;
+  ENCRYPTION_KEY: string;
+  NOMBA_BASE_URL: string;
+  REDIS_URL: string;
 };
 
 export function loadEnv(): Env {
@@ -28,7 +34,6 @@ export function loadEnv(): Env {
       .join('; ');
     throw new Error(`Invalid API environment: ${message}`);
   }
-
   const {
     NODE_ENV,
     PORT,
@@ -37,15 +42,16 @@ export function loadEnv(): Env {
     JWT_SECRET,
     JWT_ACCESS_TOKEN_EXPIRY,
     JWT_REFRESH_TOKEN_EXPIRY,
+    ENCRYPTION_KEY,
+    NOMBA_BASE_URL,
+    REDIS_URL,
   } = parsed.data;
   const frontendUrl =
     FRONTEND_URL ??
     (NODE_ENV === 'production' ? undefined : 'http://localhost:3000');
-
   if (!frontendUrl) {
     throw new Error('Invalid API environment: FRONTEND_URL is required in production');
   }
-
   return {
     NODE_ENV,
     PORT,
@@ -54,5 +60,8 @@ export function loadEnv(): Env {
     JWT_SECRET,
     JWT_ACCESS_TOKEN_EXPIRY,
     JWT_REFRESH_TOKEN_EXPIRY,
+    ENCRYPTION_KEY,
+    NOMBA_BASE_URL,
+    REDIS_URL,
   };
 }

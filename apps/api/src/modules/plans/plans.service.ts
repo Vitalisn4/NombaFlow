@@ -68,7 +68,7 @@ export class PlansService {
 
   async getById(merchantId: string, planId: string) {
     const plan = await this.getOwnedPlan(planId, merchantId);
-    const subscribers = await this.getSubscriberSummary(planId);
+    const subscribers = await this.getSubscriberSummary(planId, merchantId);
 
     return toPlanDetailWithSubscribers(plan, subscribers);
   }
@@ -105,6 +105,7 @@ export class PlansService {
     const activeSubscriberCount = await this.prisma.subscription.count({
       where: {
         planId: plan.id,
+        merchantId,
         status: 'ACTIVE',
       },
     });
@@ -126,19 +127,20 @@ export class PlansService {
   }
 
   private async getOwnedPlan(planId: string, merchantId: string) {
-    const plan = await this.prisma.plan.findUnique({
-      where: { id: planId },
+    const plan = await this.prisma.plan.findFirst({
+      where: { id: planId, merchantId },
     });
 
-    if (!plan) {
-      throw new ApiException(
-        ApiErrorCode.NOT_FOUND,
-        'Plan not found.',
-        HttpStatus.NOT_FOUND,
-      );
+    if (plan) {
+      return plan;
     }
 
-    if (plan.merchantId !== merchantId) {
+    const exists = await this.prisma.plan.findUnique({
+      where: { id: planId },
+      select: { id: true },
+    });
+
+    if (exists) {
       throw new ApiException(
         ApiErrorCode.FORBIDDEN,
         'You do not have access to this plan.',
@@ -146,22 +148,27 @@ export class PlansService {
       );
     }
 
-    return plan;
+    throw new ApiException(
+      ApiErrorCode.NOT_FOUND,
+      'Plan not found.',
+      HttpStatus.NOT_FOUND,
+    );
   }
 
-  private async getSubscriberSummary(planId: string) {
+  private async getSubscriberSummary(planId: string, merchantId: string) {
     const [active, pastDue, cancelled] = await Promise.all([
       this.prisma.subscription.count({
-        where: { planId, status: 'ACTIVE' },
+        where: { planId, merchantId, status: 'ACTIVE' },
       }),
       this.prisma.subscription.count({
         where: {
           planId,
+          merchantId,
           status: { in: ['PAST_DUE', 'DUNNING'] },
         },
       }),
       this.prisma.subscription.count({
-        where: { planId, status: 'CANCELLED' },
+        where: { planId, merchantId, status: 'CANCELLED' },
       }),
     ]);
 

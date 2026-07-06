@@ -1,6 +1,8 @@
 import type { Plan } from '@nombaflow/database';
 import { loadEnv } from '../../config/env';
 
+const frontendBaseUrl = loadEnv().FRONTEND_URL.replace(/\/$/, '');
+
 type PlanRecord = Pick<
   Plan,
   | 'id'
@@ -23,8 +25,7 @@ function formatAmount(amount: Plan['amount']): string {
 }
 
 function buildEnrollmentLink(planId: string): string {
-  const base = loadEnv().FRONTEND_URL.replace(/\/$/, '');
-  return `${base}/enroll/${planId}`;
+  return `${frontendBaseUrl}/enroll/${planId}`;
 }
 
 export function toPlanDetailResponse(plan: PlanRecord) {

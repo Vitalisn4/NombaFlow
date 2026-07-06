@@ -4,7 +4,10 @@ import { LoggerModule } from 'nestjs-pino';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { ApiExceptionFilter } from './common/filters/api-exception.filter';
 import { resolveRequestId } from './common/utils/request-id';
+import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { MerchantsModule } from './modules/merchants/merchants.module';
 import { SmokeModule } from './smoke/smoke.module';
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -34,6 +37,9 @@ const isProduction = process.env.NODE_ENV === 'production';
       },
     }),
     HealthModule,
+    DatabaseModule,
+    AuthModule,
+    MerchantsModule,
     ...(isProduction ? [] : [SmokeModule]),
   ],
   providers: [

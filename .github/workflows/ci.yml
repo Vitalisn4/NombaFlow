@@ -16,6 +16,8 @@ permissions:
 
 env:
   DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+  JWT_SECRET: ci-jwt-secret-for-build-only-min-32-chars
+  FRONTEND_URL: http://localhost:3000
   PNPM_VERSION: "9.15.4"
 
 jobs:

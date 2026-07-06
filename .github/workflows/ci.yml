@@ -1,0 +1,139 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+  JWT_SECRET: ci-jwt-secret-for-build-only-min-32-chars
+  FRONTEND_URL: http://localhost:3000
+  PNPM_VERSION: "9.15.4"
+
+jobs:
+  ci:
+    name: Lint, typecheck, build, audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint web
+        run: pnpm --filter @nombaflow/web lint
+
+      - name: Typecheck web
+        run: pnpm --filter @nombaflow/web typecheck
+
+      - name: Build web
+        run: pnpm --filter @nombaflow/web build
+        env:
+          JWT_SECRET: ci-jwt-secret-for-build-only
+
+      - name: Lint API
+        run: pnpm --filter @nombaflow/api lint
+
+      - name: Typecheck API
+        run: pnpm --filter @nombaflow/api typecheck
+
+      - name: Build API
+        run: pnpm --filter @nombaflow/api build
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high
+
+  deploy-api:
+    name: Deploy API (Railway staging)
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli@4.5.4
+
+      - name: Redeploy API service
+        run: railway redeploy --service "${{ secrets.RAILWAY_API_SERVICE_ID }}" --yes
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-ai-service:
+    name: Deploy AI service (Railway staging)
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli@4.5.4
+
+      - name: Redeploy AI service
+        run: railway redeploy --service "${{ secrets.RAILWAY_AI_SERVICE_ID }}" --yes
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+  deploy-web:
+    name: Deploy web (Vercel staging)
+    needs: ci
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ github.workspace }}
+
+      - name: Pull Vercel environment
+        run: npx vercel@39.1.0 pull --yes --environment=preview --token="${{ secrets.VERCEL_TOKEN }}"
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Build for Vercel
+        run: npx vercel@39.1.0 build --token="${{ secrets.VERCEL_TOKEN }}"
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy to Vercel
+        run: npx vercel@39.1.0 deploy --prebuilt --token="${{ secrets.VERCEL_TOKEN }}"
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

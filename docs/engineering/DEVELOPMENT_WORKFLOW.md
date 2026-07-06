@@ -111,7 +111,7 @@ Production deploy: Issue #29 on Day 3.
 ## 8. When blocked
 
 1. Check issue **Depends on** — is prerequisite Done?
-2. Check [Document Authority](../DOCUMENT_AUTHORITY.md) for doc conflicts
+2. Check API Contract and Nomba Verified doc; ask project lead if still unclear
 3. Check [Nomba docs](https://developer.nomba.com/llms.txt)
 4. Post in team chat with: issue #, what you tried, error message
 5. Do not start a different issue if blocked &lt; 2 hours — pair instead

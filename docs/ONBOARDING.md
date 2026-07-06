@@ -9,10 +9,10 @@
 | Person | Role | GitHub label | Start here |
 |---|---|---|---|
 | Backend Developer | API, DB, Nomba, queues, email | `owner: backend` | Issues #3, #5, #6 |
-| Full Stack Developer | UI, monorepo, demo | `owner: fullstack` | Issues #1, #2, #9 |
+| Full Stack Developer | UI, monorepo, demo | `owner: fullstack` | Issues #2, #9 |
 | AI Specialist | FastAPI, models | `owner: ai` | Issue #4 |
 
-Full map: [Team Assignments](./operations/TEAM_ASSIGNMENTS.md)
+Pick up work from the [GitHub Issues board](https://github.com/Vitalisn4/NombaFlow/issues).
 
 ---
 
@@ -21,7 +21,7 @@ Full map: [Team Assignments](./operations/TEAM_ASSIGNMENTS.md)
 - [ ] Clone repo, run `pnpm install` from root
 - [ ] Read [Architecture](./engineering/ARCHITECTURE.md) (15 min)
 - [ ] Read [Nomba API Verified](./engineering/NombaFlow_Nomba_API_Verified.md) (Backend + Full Stack — 20 min)
-- [ ] Skim your Day 1 issues in [GitHub Issues doc](./operations/NombaFlow_GitHub_Issues.md)
+- [ ] Skim your Day 1 issues on [GitHub](https://github.com/Vitalisn4/NombaFlow/issues)
 - [ ] Join team password manager vault for secrets
 - [ ] Get access: GitHub repo, Neon, Upstash, Railway, Vercel, Resend, Anthropic
 
@@ -40,8 +40,8 @@ Full map: [Team Assignments](./operations/TEAM_ASSIGNMENTS.md)
 | How do I code/review? | [Coding Standards](./engineering/CODING_STANDARDS.md) |
 | Git & PR process? | [Development Workflow](./engineering/DEVELOPMENT_WORKFLOW.md) |
 | Env vars? | [Env Variables](./engineering/NombaFlow_Env_Variables.md) |
-| My tasks? | [GitHub Issues](./operations/NombaFlow_GitHub_Issues.md) |
-| Conflicting docs? | [Document Authority](./DOCUMENT_AUTHORITY.md) |
+| My tasks? | [GitHub Issues](https://github.com/Vitalisn4/NombaFlow/issues) |
+| Conflicting docs? | Ask project lead; API Contract and Nomba Verified doc win for implementation |
 
 ---
 
@@ -85,4 +85,4 @@ Details: [LOCAL_SETUP.md](./engineering/LOCAL_SETUP.md)
 
 - **Nomba API:** [developer.nomba.com](https://developer.nomba.com/llms.txt)
 - **Blocked &gt; 2h:** Pair with teammate on the blocking issue
-- **Doc conflict:** Flag Full Stack Developer; update [Document Authority](./DOCUMENT_AUTHORITY.md)
+- **Doc conflict:** Flag project lead; [API Contract](./engineering/NombaFlow_API_Contract_v2.md) and [Nomba Verified](./engineering/NombaFlow_Nomba_API_Verified.md) win

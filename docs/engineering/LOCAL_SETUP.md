@@ -29,13 +29,14 @@ Create these before writing feature code:
 ## Repository setup
 
 ```bash
-git clone https://github.com/your-org/nombaflow.git
-cd nombaflow
+git clone git@github.com:Vitalisn4/NombaFlow.git
+cd NombaFlow
+git checkout develop
 corepack enable
 pnpm install   # from repo root — installs all workspace packages
 ```
 
-Follow [GitHub Issue #1](./operations/NombaFlow_GitHub_Issues.md) for monorepo scaffolding (`pnpm-workspace.yaml`, root `package.json`).
+Issue #1 (monorepo init) is **complete** on `main`. Continue with Issues #2–#4 on GitHub for full app tooling.
 
 **Package manager rule:** use **pnpm only** — do not use npm or yarn in this repo. Commit `pnpm-lock.yaml`.
 
@@ -45,6 +46,7 @@ Follow [GitHub Issue #1](./operations/NombaFlow_GitHub_Issues.md) for monorepo s
 cp apps/web/.env.example apps/web/.env.local
 cp apps/api/.env.example apps/api/.env
 cp apps/ai-service/.env.example apps/ai-service/.env
+cp packages/database/.env.example packages/database/.env
 ```
 
 Full reference: [Environment Variables](./NombaFlow_Env_Variables.md)

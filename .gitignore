@@ -11,6 +11,7 @@ dist/
 build/
 .next/
 out/
+*.tsbuildinfo
 
 # Environment
 .env
@@ -24,12 +25,23 @@ __pycache__/
 .venv/
 venv/
 
-# Prisma generated
+# Prisma generated (legacy custom output — client now uses @prisma/client in node_modules)
 packages/database/generated/
+
+# Local-only docs (team lead keeps these on disk; not published to GitHub)
+docs/strategy/
+docs/operations/
+docs/FOUNDATION_READINESS.md
+docs/DOCUMENT_AUTHORITY.md
+docs/product/NombaFlow_Demo_Script.md
+docs/product/NombaFlow_Slide_Deck.md
+docs/product/NombaFlow_Email_Templates.md
 
 # IDE
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 *.swp
 
 # OS

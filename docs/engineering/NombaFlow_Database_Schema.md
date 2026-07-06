@@ -3,12 +3,15 @@
 **Purpose:** The Backend Developer keeps this file open while writing migrations and queries.
 
 **Database:** PostgreSQL 17 via Neon
-**ORM:** Prisma 7
-**File location in repo:** `packages/database/prisma/schema.prisma`
+**ORM:** Prisma 7  
+**Schema:** `packages/database/prisma/schema.prisma`  
+**Config:** `packages/database/prisma.config.ts` (`DATABASE_URL`)
 
 ---
 
 ## 1. Prisma Configuration Block
+
+`schema.prisma`:
 
 ```prisma
 generator client {
@@ -18,9 +21,33 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 ```
+
+`prisma.config.ts` (connection URL — required in Prisma 7, not in schema):
+
+```typescript
+import 'dotenv/config';
+import { defineConfig, env } from 'prisma/config';
+
+export default defineConfig({
+  schema: 'prisma/schema.prisma',
+  datasource: { url: env('DATABASE_URL') },
+});
+```
+
+Runtime client (driver adapter required in Prisma 7):
+
+```typescript
+import { PrismaClient } from '../generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
+
+const adapter = new PrismaPg(new Pool({ connectionString: process.env.DATABASE_URL }));
+const prisma = new PrismaClient({ adapter });
+```
+
+See [Prisma 7 upgrade guide](https://www.prisma.io/docs/guides/upgrade-prisma-orm/v7).
 
 ---
 

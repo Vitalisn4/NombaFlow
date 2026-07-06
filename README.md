@@ -2,6 +2,9 @@
 
 **Managed recurring billing engine on Nomba** — built for the [Nomba × DevCareer Hackathon 2026](https://devcareer.io).
 
+**Repository:** https://github.com/Vitalisn4/NombaFlow  
+**Active branch:** `develop` (feature work) · `main` (protected, merge via PR)
+
 NombaFlow gives Nigerian businesses a subscriptions layer on top of Nomba's payment primitives: plan management, tokenized card billing, AI-powered dunning, customer self-service, and ajo/esusu group automation.
 
 **Hackathon track:** Infrastructure — Subscriptions Engine
@@ -22,7 +25,7 @@ All documentation lives in [`/docs`](./docs/README.md). Start here:
 1. [Nomba API Verified Guide](./docs/engineering/NombaFlow_Nomba_API_Verified.md) — **read first** before any Nomba code
 2. [Database Schema](./docs/engineering/NombaFlow_Database_Schema.md)
 3. [API Contract](./docs/engineering/NombaFlow_API_Contract_v2.md)
-4. [GitHub Issues Backlog](./docs/operations/NombaFlow_GitHub_Issues.md)
+4. [GitHub Issues](https://github.com/Vitalisn4/NombaFlow/issues) — pick up assigned work
 5. [Local Setup Guide](./docs/engineering/LOCAL_SETUP.md)
 
 ## Tech stack ($0 to start)
@@ -55,7 +58,7 @@ nombaflow/
 ├── pnpm-workspace.yaml
 ├── package.json
 ├── apps/
-│   ├── web/          # Next.js — Issue #2 for full Tailwind/shadcn setup
+│   ├── web/          # Next.js — GitHub #9 for full Tailwind/shadcn setup
 │   ├── api/          # NestJS — health check at GET /health
 │   └── ai-service/   # FastAPI — health check at GET /health
 ├── packages/

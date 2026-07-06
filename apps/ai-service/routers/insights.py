@@ -42,30 +42,24 @@ Merchant financial data:
         failed_count = ctx.get('failedPaymentsCount', 0)
         failed_amount = ctx.get('failedPaymentsAmount', 0)
         churned = ctx.get('churnedThisMonth', 0)
-
         q = req.question.lower()
         if "revenue" in q or "drop" in q or "grow" in q:
-            answer = f"[demo mode] Your current MRR is ₦{mrr}. You have {failed_count} failed payment(s) totalling ₦{failed_amount} at risk this cycle. Connect your Anthropic API key for live AI analysis."
+            answer = f"[demo mode] Your current MRR is ₦{mrr}. You have {failed_count} failed payment(s) totalling ₦{failed_amount} at risk this cycle."
         elif "churn" in q or "cancel" in q or "lost" in q:
-            answer = f"[demo mode] {churned} subscriber(s) churned this month. Monitor dunning closely to reduce future churn. Connect your Anthropic API key for live AI analysis."
+            answer = f"[demo mode] {churned} subscriber(s) churned this month. Monitor dunning closely to reduce future churn."
         else:
-            answer = f"[demo mode] MRR: ₦{mrr} | Failed payments: {failed_count} | Churned: {churned}. Connect your Anthropic API key for detailed AI-powered insights."
-
+            answer = f"[demo mode] MRR: ₦{mrr} | Failed payments: {failed_count} | Churned: {churned}."
         return InsightResponse(answer=answer, generatedAt=datetime.utcnow().isoformat() + "Z")
 
     try:
         import anthropic
-        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-
-        message = client.messages.create(
+        client = anthropic.AsyncAnthropic(api_key=ANTHROPIC_API_KEY)
+        message = await client.messages.create(
             model="claude-haiku-4-5-20251001",
             max_tokens=300,
             system=(
                 "You are a financial analyst assistant for NombaFlow, a Nigerian subscription "
-                "billing platform. You help merchants understand their revenue, churn, and "
-                "payment recovery data. Always respond in 2-4 sentences maximum. "
-                "Be specific with numbers from the data provided. Use ₦ for Nigerian Naira. "
-                "Be direct and actionable — merchants are busy business owners."
+                "billing platform. Always respond in 2-4 sentences. Use ₦ for Naira. Be direct."
             ),
             messages=[{"role": "user", "content": f"{context_str}\n\nMerchant question: {req.question}"}],
         )

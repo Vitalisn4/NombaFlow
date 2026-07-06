@@ -8,6 +8,8 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32),
   JWT_ACCESS_TOKEN_EXPIRY: z.string().default('15m'),
   JWT_REFRESH_TOKEN_EXPIRY: z.string().default('7d'),
+  REDIS_URL: z.string().min(1),
+  NOMBA_WEBHOOK_SECRET: z.string().min(32),
 });
 
 export type Env = {
@@ -18,6 +20,8 @@ export type Env = {
   JWT_SECRET: string;
   JWT_ACCESS_TOKEN_EXPIRY: string;
   JWT_REFRESH_TOKEN_EXPIRY: string;
+  REDIS_URL: string;
+  NOMBA_WEBHOOK_SECRET: string;
 };
 
 export function loadEnv(): Env {
@@ -37,6 +41,8 @@ export function loadEnv(): Env {
     JWT_SECRET,
     JWT_ACCESS_TOKEN_EXPIRY,
     JWT_REFRESH_TOKEN_EXPIRY,
+    REDIS_URL,
+    NOMBA_WEBHOOK_SECRET,
   } = parsed.data;
   const frontendUrl =
     FRONTEND_URL ??
@@ -54,5 +60,7 @@ export function loadEnv(): Env {
     JWT_SECRET,
     JWT_ACCESS_TOKEN_EXPIRY,
     JWT_REFRESH_TOKEN_EXPIRY,
+    REDIS_URL,
+    NOMBA_WEBHOOK_SECRET,
   };
 }

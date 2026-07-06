@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from datetime import datetime, timedelta
 
 router = APIRouter()
@@ -11,6 +11,13 @@ class ActiveSubscription(BaseModel):
     intervalDays: int
     nextBillingDate: str
     historicalSuccessRate: float
+
+    @field_validator('intervalDays')
+    @classmethod
+    def interval_must_be_positive(cls, v: int) -> int:
+        if v <= 0:
+            raise ValueError('intervalDays must be a positive integer')
+        return v
 
 
 class ForecastRequest(BaseModel):
@@ -51,12 +58,13 @@ def project_collections(subscriptions, days, churn_rate_monthly, new_subs_per_mo
     if subscriptions:
         avg_amount = sum(s.amount for s in subscriptions) / len(subscriptions)
         avg_interval = sum(s.intervalDays for s in subscriptions) / len(subscriptions)
-        for month in range(days // 30):
-            subs_by_month = new_subs_per_month * (month + 1)
-            charges_per_sub = max(1, int((days - month * 30) // avg_interval))
-            new_rev = subs_by_month * avg_amount * charges_per_sub * 0.85
-            total_expected += new_rev
-            total_risk_adjusted += new_rev * 0.80
+        if avg_interval > 0:
+            for month in range(days // 30):
+                subs_by_month = new_subs_per_month * (month + 1)
+                charges_per_sub = max(1, int((days - month * 30) // avg_interval))
+                new_rev = subs_by_month * avg_amount * charges_per_sub * 0.85
+                total_expected += new_rev
+                total_risk_adjusted += new_rev * 0.80
 
     return round(total_expected, 2), round(total_risk_adjusted, 2)
 

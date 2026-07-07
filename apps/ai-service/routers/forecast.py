@@ -1,22 +1,30 @@
-from fastapi import APIRouter
+"""
+Cash flow forecasting.
+GET /forecast/{merchantId} — called by NestJS analytics service.
+"""
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from datetime import datetime, timedelta
+from typing import Optional
+from decimal import Decimal
+
+from db import get_active_subscriptions, get_historical_success_rate, get_at_risk_amount
 
 router = APIRouter()
 
+INTERVAL_DAYS = {
+    "DAILY": 1,
+    "WEEKLY": 7,
+    "MONTHLY": 30,
+    "QUARTERLY": 90,
+    "ANNUALLY": 365,
+}
 
-class ActiveSubscription(BaseModel):
-    subscriptionId: str
-    amount: float
-    intervalDays: int
-    nextBillingDate: str
-    historicalSuccessRate: float
 
-
-class ForecastRequest(BaseModel):
-    activeSubscriptions: list[ActiveSubscription]
-    historicalChurnRateMonthly: float
-    expectedNewSubscriptionsPerMonth: int
+class ChartDataPoint(BaseModel):
+    date: str
+    expected: str
+    collected: Optional[str] = None
 
 
 class ForecastResponse(BaseModel):
@@ -24,50 +32,61 @@ class ForecastResponse(BaseModel):
     generatedAt: str
     forecast: dict
     atRiskAmount: str
+    chartData: list[ChartDataPoint]
 
 
-def project_collections(subscriptions, days, churn_rate_monthly, new_subs_per_month):
+def project_expected_amount(subscriptions, days, success_rate):
     now = datetime.utcnow()
     end_date = now + timedelta(days=days)
     total_expected = 0.0
-    total_risk_adjusted = 0.0
 
     for sub in subscriptions:
-        try:
-            next_billing = datetime.fromisoformat(
-                sub.nextBillingDate.replace("Z", "+00:00")
-            ).replace(tzinfo=None)
-        except Exception:
+        interval_days = INTERVAL_DAYS.get(sub["interval"], 30) * (sub["interval_count"] or 1)
+        next_billing = sub["next_billing_date"]
+        if next_billing is None:
             continue
+        if next_billing.tzinfo is not None:
+            next_billing = next_billing.replace(tzinfo=None)
+
+        amount = float(sub["amount"]) if isinstance(sub["amount"], Decimal) else sub["amount"]
 
         current_date = next_billing
         while current_date <= end_date:
-            month_index = max(0, (current_date - now).days // 30)
-            survival_rate = (1 - churn_rate_monthly) ** month_index
-            total_expected += sub.amount * survival_rate
-            total_risk_adjusted += sub.amount * survival_rate * sub.historicalSuccessRate
-            current_date += timedelta(days=sub.intervalDays)
+            if current_date >= now:
+                total_expected += amount * success_rate
+            current_date += timedelta(days=max(interval_days, 1))
 
-    if subscriptions:
-        avg_amount = sum(s.amount for s in subscriptions) / len(subscriptions)
-        avg_interval = sum(s.intervalDays for s in subscriptions) / len(subscriptions)
-        for month in range(days // 30):
-            subs_by_month = new_subs_per_month * (month + 1)
-            charges_per_sub = max(1, int((days - month * 30) // avg_interval))
-            new_rev = subs_by_month * avg_amount * charges_per_sub * 0.85
-            total_expected += new_rev
-            total_risk_adjusted += new_rev * 0.80
-
-    return round(total_expected, 2), round(total_risk_adjusted, 2)
+    return round(total_expected, 2)
 
 
 @router.get("/forecast/{merchant_id}", response_model=ForecastResponse)
-def generate_forecast(merchant_id: str, req: ForecastRequest) -> ForecastResponse:
+def generate_forecast(merchant_id: str) -> ForecastResponse:
     now = datetime.utcnow()
 
-    exp30, risk30 = project_collections(req.activeSubscriptions, 30, req.historicalChurnRateMonthly, req.expectedNewSubscriptionsPerMonth)
-    exp60, _ = project_collections(req.activeSubscriptions, 60, req.historicalChurnRateMonthly, req.expectedNewSubscriptionsPerMonth)
-    exp90, _ = project_collections(req.activeSubscriptions, 90, req.historicalChurnRateMonthly, req.expectedNewSubscriptionsPerMonth)
+    try:
+        subscriptions = get_active_subscriptions(merchant_id)
+        success_rate = get_historical_success_rate(merchant_id)
+        at_risk_amount = get_at_risk_amount(merchant_id)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to fetch forecast data: {str(e)}")
+
+    exp30 = project_expected_amount(subscriptions, 30, success_rate)
+    exp60 = project_expected_amount(subscriptions, 60, success_rate)
+    exp90 = project_expected_amount(subscriptions, 90, success_rate)
+
+    chart_data = []
+    for month_offset in range(3):
+        date = now + timedelta(days=30 * month_offset)
+        month_start = 30 * month_offset
+        month_end = 30 * (month_offset + 1)
+        exp_this_month = project_expected_amount(subscriptions, month_end, success_rate) - (
+            project_expected_amount(subscriptions, month_start, success_rate) if month_offset > 0 else 0
+        )
+        chart_data.append(ChartDataPoint(
+            date=date.strftime("%Y-%m-%d"),
+            expected=f"{exp_this_month:.2f}",
+            collected=None,
+        ))
 
     return ForecastResponse(
         merchantId=merchant_id,
@@ -77,5 +96,6 @@ def generate_forecast(merchant_id: str, req: ForecastRequest) -> ForecastRespons
             "next60Days": f"{exp60:.2f}",
             "next90Days": f"{exp90:.2f}",
         },
-        atRiskAmount=f"{round(exp30 - risk30, 2):.2f}",
+        atRiskAmount=f"{at_risk_amount:.2f}",
+        chartData=chart_data,
     )

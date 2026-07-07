@@ -8,6 +8,7 @@ import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MerchantsModule } from './modules/merchants/merchants.module';
+import { PlansModule } from './modules/plans/plans.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { SmokeModule } from './smoke/smoke.module';
 
@@ -41,6 +42,7 @@ const isProduction = process.env.NODE_ENV === 'production';
     DatabaseModule,
     AuthModule,
     MerchantsModule,
+    PlansModule,
     WebhooksModule,
     ...(isProduction ? [] : [SmokeModule]),
   ],

@@ -13,6 +13,14 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.client.merchant;
   }
 
+  get plan(): PrismaClient['plan'] {
+    return this.client.plan;
+  }
+
+  get subscription(): PrismaClient['subscription'] {
+    return this.client.subscription;
+  }
+
   get webhookEvent(): PrismaClient['webhookEvent'] {
     return this.client.webhookEvent;
   }

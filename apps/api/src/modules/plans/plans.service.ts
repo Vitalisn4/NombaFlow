@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma } from '@nombaflow/database';
 import { PrismaService } from '../../database/prisma.service';
+import { loadEnv } from '../../config/env';
 import { ApiErrorCode } from '../../common/errors/api-error-code';
 import { ApiException } from '../../common/errors/api.exception';
 import type { CreatePlanDto, UpdatePlanDto } from './dto/plan.dto';
@@ -12,7 +13,11 @@ import {
 
 @Injectable()
 export class PlansService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly frontendBaseUrl: string;
+
+  constructor(private readonly prisma: PrismaService) {
+    this.frontendBaseUrl = loadEnv().FRONTEND_URL.replace(/\/$/, '');
+  }
 
   async create(merchantId: string, body: CreatePlanDto) {
     const plan = await this.prisma.plan.create({
@@ -30,7 +35,7 @@ export class PlansService {
       },
     });
 
-    return toPlanDetailResponse(plan);
+    return toPlanDetailResponse(plan, this.frontendBaseUrl);
   }
 
   async list(merchantId: string) {
@@ -70,7 +75,7 @@ export class PlansService {
     const plan = await this.getOwnedPlan(planId, merchantId);
     const subscribers = await this.getSubscriberSummary(planId, merchantId);
 
-    return toPlanDetailWithSubscribers(plan, subscribers);
+    return toPlanDetailWithSubscribers(plan, subscribers, this.frontendBaseUrl);
   }
 
   async update(merchantId: string, planId: string, body: UpdatePlanDto) {
@@ -92,14 +97,14 @@ export class PlansService {
       },
     });
 
-    return toPlanDetailResponse(updated);
+    return toPlanDetailResponse(updated, this.frontendBaseUrl);
   }
 
   async archive(merchantId: string, planId: string) {
     const plan = await this.getOwnedPlan(planId, merchantId);
 
     if (plan.status === 'ARCHIVED') {
-      return toPlanDetailResponse(plan);
+      return toPlanDetailResponse(plan, this.frontendBaseUrl);
     }
 
     const activeSubscriberCount = await this.prisma.subscription.count({
@@ -123,7 +128,7 @@ export class PlansService {
       data: { status: 'ARCHIVED' },
     });
 
-    return toPlanDetailResponse(archived);
+    return toPlanDetailResponse(archived, this.frontendBaseUrl);
   }
 
   private async getOwnedPlan(planId: string, merchantId: string) {

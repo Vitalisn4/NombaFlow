@@ -1,7 +1,4 @@
 import type { Plan } from '@nombaflow/database';
-import { loadEnv } from '../../config/env';
-
-const frontendBaseUrl = loadEnv().FRONTEND_URL.replace(/\/$/, '');
 
 type PlanRecord = Pick<
   Plan,
@@ -24,11 +21,11 @@ function formatAmount(amount: Plan['amount']): string {
   return amount.toFixed(2);
 }
 
-function buildEnrollmentLink(planId: string): string {
+function buildEnrollmentLink(planId: string, frontendBaseUrl: string): string {
   return `${frontendBaseUrl}/enroll/${planId}`;
 }
 
-export function toPlanDetailResponse(plan: PlanRecord) {
+export function toPlanDetailResponse(plan: PlanRecord, frontendBaseUrl: string) {
   return {
     id: plan.id,
     merchantId: plan.merchantId,
@@ -42,7 +39,7 @@ export function toPlanDetailResponse(plan: PlanRecord) {
     planType: plan.planType,
     status: plan.status,
     trialDays: plan.trialDays,
-    enrollmentLink: buildEnrollmentLink(plan.id),
+    enrollmentLink: buildEnrollmentLink(plan.id, frontendBaseUrl),
     createdAt: plan.createdAt.toISOString(),
   };
 }
@@ -64,6 +61,7 @@ export function toPlanListItem(
 export function toPlanDetailWithSubscribers(
   plan: PlanRecord,
   subscribers: { active: number; pastDue: number; cancelled: number },
+  frontendBaseUrl: string,
 ) {
   return {
     id: plan.id,
@@ -78,7 +76,7 @@ export function toPlanDetailWithSubscribers(
     planType: plan.planType,
     status: plan.status,
     trialDays: plan.trialDays,
-    enrollmentLink: buildEnrollmentLink(plan.id),
+    enrollmentLink: buildEnrollmentLink(plan.id, frontendBaseUrl),
     createdAt: plan.createdAt.toISOString(),
     subscribers,
   };

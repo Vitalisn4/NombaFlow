@@ -1,4 +1,4 @@
-import { createHmac } from 'node:crypto';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { NombaWebhookPayload } from './types/nomba-webhook.types';
 
 function buildNombaHashingPayload(
@@ -45,6 +45,12 @@ export function verifyNombaWebhookSignature(
   }
 
   const computed = computeNombaWebhookSignature(payload, nombaTimestamp, secret);
+  const provided = Buffer.from(nombaSignature.toLowerCase());
+  const expected = Buffer.from(computed.toLowerCase());
 
-  return nombaSignature.toLowerCase() === computed.toLowerCase();
+  if (provided.length !== expected.length) {
+    return false;
+  }
+
+  return timingSafeEqual(provided, expected);
 }

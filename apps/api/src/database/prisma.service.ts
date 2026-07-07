@@ -21,6 +21,10 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
     return this.client.subscription;
   }
 
+  get webhookEvent(): PrismaClient['webhookEvent'] {
+    return this.client.webhookEvent;
+  }
+
   async onModuleInit(): Promise<void> {
     await this.client.$connect();
   }

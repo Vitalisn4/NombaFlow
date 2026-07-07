@@ -18,6 +18,8 @@ env:
   DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
   JWT_SECRET: ci-jwt-secret-for-build-only-min-32-chars
   FRONTEND_URL: http://localhost:3000
+  REDIS_URL: redis://localhost:6379
+  NOMBA_WEBHOOK_SECRET: ci-nomba-webhook-secret-for-build-only-min-32
   PNPM_VERSION: "9.15.4"
 
 jobs:

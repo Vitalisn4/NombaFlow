@@ -1,3 +1,7 @@
+"""
+Churn probability scoring.
+POST /churn-score — called by NestJS subscription service.
+"""
 from fastapi import APIRouter
 from pydantic import BaseModel
 
@@ -5,22 +9,22 @@ router = APIRouter()
 
 
 class ChurnRequest(BaseModel):
-    customerId: str
     subscriptionId: str
+    customerId: str
     subscriptionAgeDays: int
     consecutiveFailedCharges: int
     daysSinceLastSuccess: int
-    planPriceTier: str
+    planPriceTier: str  # LOW, MID, HIGH
     portalLoginsLast30Days: int
     paymentMethodUpdatedRecently: bool
     totalCyclesCompleted: int
 
 
 class ChurnResponse(BaseModel):
-    customerId: str
     subscriptionId: str
-    churnProbability30d: float
-    riskLevel: str
+    customerId: str
+    churnProbability: float  # 0.0 - 1.0
+    riskLevel: str  # LOW, MEDIUM, HIGH, CRITICAL
     topRiskFactors: list[str]
     recommendedAction: str
 
@@ -74,21 +78,21 @@ def score_churn(req: ChurnRequest) -> ChurnResponse:
 
     if score >= 0.75:
         risk_level = "CRITICAL"
-        action = "Immediate intervention required. Contact customer directly, offer a payment plan or temporary pause to prevent cancellation."
+        action = "Immediate intervention required. Contact customer directly, offer a payment plan or temporary pause."
     elif score >= 0.50:
         risk_level = "HIGH"
-        action = "Send a personalised payment reminder with a direct link to update card details. Consider offering a one-time discount."
+        action = "Send a personalised payment reminder with a direct link to update card details."
     elif score >= 0.25:
         risk_level = "MEDIUM"
-        action = "Monitor closely. Send a soft reminder email about the upcoming charge and ensure card details are current."
+        action = "Monitor closely. Send a soft reminder about the upcoming charge."
     else:
         risk_level = "LOW"
         action = "No action needed. Customer is in good standing."
 
     return ChurnResponse(
-        customerId=req.customerId,
         subscriptionId=req.subscriptionId,
-        churnProbability30d=round(score, 2),
+        customerId=req.customerId,
+        churnProbability=round(score, 2),
         riskLevel=risk_level,
         topRiskFactors=risk_factors[:3],
         recommendedAction=action,

@@ -10,7 +10,7 @@
     "db:seed": "prisma db seed"
   },
   "dependencies": {
-    "@prisma/client": "^6.9.0"
+    "@prisma/client": "^7.9.0"
   },
   "devDependencies": {
     "prisma": "^6.9.0",
